@@ -8,12 +8,13 @@ This project uses executable tests to explore coroutine behavior alongside a rea
 ./gradlew test
 ```
 
-The tests in `StructuredConcurrencyTests` demonstrate two structured-concurrency guarantees:
+The tests in `StructuredConcurrencyTests` demonstrate structured-concurrency behavior:
 
 - `coroutineScope` does not return until its children finish, even after the scope block itself has reached its end.
 - A child failure cancels its sibling and is propagated from the scope.
+- Swallowing a `CancellationException` allows immediate non-suspending code to run, but the next suspension still observes the cancelled job.
 
-Both examples coordinate with `CompletableDeferred`, not timing-based sleeps.
+The structured-concurrency examples use delays to make child work visible: one shows the scope waiting for a child, another shows a failing child cancelling its sibling during a long delay, and a third demonstrates why cancellation exceptions should not be swallowed.
 
 ## Following the HTTP thread trace
 
