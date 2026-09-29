@@ -16,6 +16,8 @@ The tests in `StructuredConcurrencyTests` demonstrate structured-concurrency beh
 
 The structured-concurrency examples use delays to make child work visible: one shows the scope waiting for a child, another shows a failing child cancelling its sibling during a long delay, and a third demonstrates why cancellation exceptions should not be swallowed.
 
+`GracefulCoroutineScopeTests` demonstrates a long-lived `SupervisorJob` scope like an application-managed scope: `close()` stops accepting new work and waits for current children, then cancels and joins them if the shutdown timeout expires. The tests contrast a supervisor, where one failed child does not cancel its sibling, with a regular `Job`, where that failure does cancel the sibling. In both cases, a `CoroutineExceptionHandler` observes the failure. The work uses cooperative suspensions (`delay`), so cancellation and bounded shutdown can complete.
+
 ## Following the HTTP thread trace
 
 The threading tests and their supporting fixtures are grouped under `pl.allegro.cyan.coroutines.threading`.
