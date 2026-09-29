@@ -22,6 +22,8 @@ The structured-concurrency examples use delays to make child work visible: one s
 
 The threading tests and their supporting fixtures are grouped under `pl.allegro.cyan.coroutines.threading`.
 
+Start with `DispatcherDemoTests`: it shows the simplest dispatcher transition, including a `delay` and resumption on the same dispatcher. The numbered WebClient tests build on that example.
+
 `GreetingClientTests` makes the same WireMock request in two ways: one test wraps the call in `withContext` using a named, single-thread dispatcher, and the other calls it directly from `runBlocking`. The service itself only handles the WebClient request; the tests own the coroutine context and record each phase:
 
 | Phase | What is running |
