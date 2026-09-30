@@ -6,8 +6,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Executors
-import kotlin.test.assertNotSame
-import kotlin.test.assertSame
 
 class DispatcherDemoTests {
 
@@ -34,6 +32,44 @@ class DispatcherDemoTests {
             println("Caller after withContext: ${Thread.currentThread().name}")
         } finally {
             dispatcher.close()
+        }
+    }
+
+    @Test
+    fun `nested withContext`() = runBlocking {
+        val dispatcherOuter = Executors.newSingleThreadExecutor { task ->
+            Thread(task, "dispatcher-demo-worker-outer").apply { isDaemon = true }
+        }.asCoroutineDispatcher()
+
+        val dispatcherInner = Executors.newSingleThreadExecutor { task ->
+            Thread(task, "dispatcher-demo-worker-inner").apply { isDaemon = true }
+        }.asCoroutineDispatcher()
+
+        try {
+            val callerThread = Thread.currentThread()
+            println("Caller: ${callerThread.name}")
+
+            withContext(dispatcherOuter) {
+                val beforeDelay = Thread.currentThread()
+                println("Coroutine before outer delay: ${beforeDelay.name}")
+
+                delay(50)
+
+                withContext(dispatcherInner) {
+                    val innerThreadBefore = Thread.currentThread()
+                    println("Coroutine before inner delay: ${innerThreadBefore.name}")
+                    delay(50)
+                    val innerThreadAfter = Thread.currentThread()
+                    println("Coroutine after inner delay: ${innerThreadAfter.name}")
+                }
+
+                val afterDelay = Thread.currentThread()
+                println("Coroutine after outer delay: ${afterDelay.name}")
+            }
+
+            println("Caller after withContext: ${Thread.currentThread().name}")
+        } finally {
+            dispatcherInner.close()
         }
     }
 }
